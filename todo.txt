@@ -1,0 +1,78 @@
+As such, here are my suggestions
+:
+1.      Focus section 1 on GALE and its potential use in optimization of  models and do not focus on WMC or CDA at all. Explain that GALE could be used to analyze cognitive models that in general are very complex and thus could use model-based analysis frameworks such as GALE to make analysis more tractable.
+
+Yes. And following on from your suggestions, we moved much of section 4 into section1  
+
+2.      Delete section 2. I find it really is distracting. Pull the idea that there are too many analyses to run from section 2 into the new introduction but all the information about cockpit automation history and the 2 aviation examples are not necessary.
+
+Here, I'd like to push back a little on your
+editorial suggestions. 
+
+Certainly, this section can
+be extensively shortenned, and this draft does that. 
+
+But I want
+to point out that you work in this field and hence
+you do not need a strong motivation to read this
+paper.  
+
+Please consider another kind of reader, one
+who is only tangentially connected with this
+work. That reader would need some "gentiling" in
+order to read this article. For example, in terms of
+supplying that motivation to read the paper, I
+really like the phrase "a modern airplane is really
+a computer with wings" and those graphics of
+increasining fearsome cockpit complexity.
+
+All that said, if you make this a requirement, I will of course make the changes you request.
+
+3.      Delete the current Section 3 (it should go into a case study)
+
+Again, not to be contrary, I've wound an intro to CDA into the motivation section of a new section 2.
+
+Pleae have a read of that section2 and tell me if you'll accept that.
+
+4.  The current section 4 should really be section
+2. However the material at its start about
+model-based approaches should be moved to the new
+introduction. Get rid of the discussion of what you
+will explore later in the paper from section
+2. Again no CDA, HTM, FA CCM and SC material should
+go there. From 4.1 delete all of the material about
+Kim’s thesis. The text in 4.1 could be very
+short. The text up until “the problem here” could
+just say simulations with many input parameters grow
+in factorial space and there is a need for efficient
+modeling techniques.
+
+Yes. Done.
+
+5.      I can’t really comments on Section 5 because this is your technology. However again take out all the CDA and WMC portions.
+
+Yes... there is one para from there that works **much** better in the introduction anyway
+
+6.      Now the new section 3 should be the methods for your case study and the new section 4 should be the results of your case study.
+
+7.      This new methods section should read like a methods section where you have apparatus, independent variables, dependent variables, data analysis and so on. In the way I read your paper, the WMC simulation was used to create data sets that you analyze using GALE. If I am incorrectly understanding this, of course then correct me. If I am right, you could explain WMC, the CDA model, the parameters it uses and the data set it creates in each run in an apparatus section. The dependent variables and independent variables sections would be those used by GALE. The data analysis part really  is the part where you describe how you ran GALE (pop size of 100 and so on).
+
+
+I've tried  making  these changes you suggest but but I'm not 100\% familiar 
+the reporting standards of your field.
+
+Have a read, see what you think.
+
+8.      In your new results section you would have a subsection for exp 1 and one for exp 2
+
+Done
+
+9.      Section 6.6, 6.7 and Section 7 look like what should be in a discussion section
+
+Done.
+
+10.  Section 8 can also be deleted
+
+ok
+
+I totally get it if you find this really annoying but I hope you take these comments as a way to make your paper relevant to the journal’s readers. I think it could be shorter and focused on the story you are trying to tell.
