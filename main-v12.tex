@@ -10,6 +10,10 @@
 \usepackage{cite}
 \usepackage{alltt}
 \newcommand{\eq}[1]{Equation~\ref{eq:#1}}
+
+\newcommand{\bd}{\begin{description}}
+\newcommand{\ed}{\end{description}}
+
 \newcommand{\bi}{\begin{itemize}}
 \newcommand{\ei}{\end{itemize}}
 \newcommand{\be}{\begin{enumerate}}
@@ -54,11 +58,11 @@
 \begin{document}
 
 %Learning Effective Pilot Operation Strategies with a Cognitive Model for Safe Aircraft Approach
-\title{Better Model-Based Analysis of\\ Human Factors for Safe Aircraft Approach}
+\title{Learning Mitigations for Pilot Issues when Landing   Aircraft 
+(via Multi-Objective Optimization and Multi-agent Simulations)}
 
 
-\author{Joseph~Krall\thanks{Joseph Krall  
-is a postdoctoral research fellow at LoadIQ, Reno, Nevada;
+\author{Joseph~Krall\thanks{ Joseph Krall is a chief data scientist at LoadIQ, Reno, Nevada; 
 e-mail: kralljoe@gmail.com}, %
 Tim~Menzies~\IEEEmembership{Member,~IEEE}\thanks{Tim Menzies is with the Computer Science department, NcState University; email:  tim.menzies@gmail.com.}, %
 Misty Davies~\IEEEmembership{Member,~IEEE}
@@ -82,16 +86,20 @@ misty.d.davies@nasa.gov.}
 %in this paper we   use WMC to  describe limitations to the size of a task load that a pilot can handle before flight operations become unsafe (due to average delays in completing the task load). We also show that  such limitations only exist due to the overly complex nature of flying aircraft  \TIM{to wimpy?}.
 %\JOE{Misty says: Joe, I'm not sure I agree with the final statement in the abstract. Can you tell me what you were trying to say in a different way? }
 
-How can analysts better reason about the complex interactions between humans and machines in safety critical systems? 
-For example, consider the complexities arising when
-a large commercial aircraft makes a runway approach.
-At that time, pairs of pilots interact with both each other and a
-large number of intricate on-board automated systems.  
-Any model of that kind of pilot interaction is inherently complex and, therefore, inherently hard to commission, debug, and study.
-
 We advocate exploring complex models by combining data miners (to find a small set of most critical examples) and of multi-objective optimizers (that focus on  those critical examples). 
 An example of such a combination is the GALE optimizer that intelligently explores thousands of scenarios by examining just a few dozen of the most informative examples.  
 GALE-style reasoning enables a very fast, very wide-ranging exploration of behaviors, as well as the effects of those behaviors' limitations.
+
+This paper applies GALE to  the CDA (continuous descent approach) model within the
+Georgia Tech WMV (Work Models that Compute) framework. CDA is a model of pilot interactions: with each other and  also  with  the  navigation  systems  critical  to  safe  flight.
+We show that, using CDA+GALE, it is possible to
+identify and mitigate  factors that make pilots unable to complete
+all their required tasks in the context of
+different (1) function allocation strategies, (2)~pilot cognitive control strategies, and (3)~operational contexts that  impact and safe aircraft operation.
+We also show that other optimization methods can be so slow to run 
+that, without GALE,
+it might be impractical to find those mitigations.
+
 
 
 
@@ -116,27 +124,27 @@ Human Factors, Cognitive Modeling, Multi-objective Optimization, Active Learning
 
 \section{Introduction}
 There are many advantages of a model-based approach to human factors. 
-Traditional human-in-the-loop experimental case-studies are expensive, time consuming, and difficult to reproduce.
+Traditional human-in-the-loop (HITL) experimental case-studies are expensive, time consuming, and difficult to reproduce.
 Model-based conclusions, on the other hand, are reproducible and verifiable (just run the model again).
-Another advantage of the model-based approach is that models can simulate real world behavior much faster than real-time;
-thereby enabling an extensive evaluation of more options than slow-time real-world case studies.
+Another advantage of the model-based approach is that models can simulate abstracted
+real world behavior much faster than real-time;
+thereby enabling an extensive evaluation of more options than would be possible with HITLs.
 
-In theory, complex models can be analyzed via multi-objective optimizers by running them across many CPUs. 
+In theory, complex models can be analyzed via multi-objective optimizers by running them across many 
+central processing units (CPUs). 
 In practice, that CPU may not be available.
-For example one of us (Davies) regularly analyzes a model that needs 30 weeks of CPU time. 
+For example one of us regularly analyzes a model that needs 30 weeks of CPU time. 
 For high priority issues in need of urgent resolution, then this 30 weeks of computer time can be achieved in five days of parallel execution on NASA's supercomputers.
-However,  researchers can usually access a small fraction of that CPU. 
-For example, if there has been some incident on a manned space mission,  NASA enlists all available CPU time for ``damage modeling'' (which is a large series of ``what-if'' queries to assess potential impacts). 
-At those times, researchers can access zero CPU for any other purpose. 
+However, in practice  researchers can usually access a small fraction of that CPU.  
 
 
-To address this problem in other domains, we have proposed a new optimization method, called GALE~\cite{krall14aaai,krallphd,galepaper},
+To address this problem in other domains, we have proposed an optimization method, called GALE~\cite{krall14aaai,krallphd,galepaper},
 that  focuses on a small number of most informative examples.
 Hence, GALE explores only a few dozen examples rather than the thousands (or more) used  by traditional methods~\cite{galepaper,krall14aaai}. 
 This simplifies and improves our ability to reason about complex cognitive models.
 
 In practice, GALE runs much faster than traditional optimizers. 
-Standard optimization algorithms such as NSGA-II~\cite{deb00afast} require 3000 to 5000 evaluations to explore the pilot simulator that is the large study of this paper. 
+Standard optimization algorithms such as NSGA-II~\cite{deb00afast} require 3000 to 5000 evaluations to explore the pilot simulator that is the focus of this paper. 
 GALE, on the other hand, performs the same task using 25 to 50 evaluations~\cite{krallphd}.
 In practice, this has tremendous practical implications.
 When generating conclusions from a randomizing optimizer such as GALE or NSGA-II, it is important to check that the conclusions hold in multiple repeats (say, 20 repeats). 
@@ -146,51 +154,23 @@ takes 1.5 and 100 hours for GALE and NSGA-II, respectively~\cite{krallphd}.
 
 
 
-\begin{figure*}[!t]
-\begin{minipage}{2in}
-\noindent
-\includegraphics[width=1.6in]{images/HavilandMoth1936GS}
 
-\noindent
-Fig.~\ref{fig:sfig}a: Haviland Moth,1936\cite{deHavilandPhoto}.
-
-~\\
-
-
-\noindent \includegraphics[width=1.6in]{images/Butler-dc7-N6353C-071102-fox-tanker66-01-16g}
-\noindent
-Fig.~\ref{fig:sfig}b:  DC7, 1953\cite{DC7photo}.
-
-\end{minipage}~~~~~~\begin{minipage}{6in}
-
-
-\noindent
-  \includegraphics[width=4.8in]{images/800px-Airbus_A380_cockpit}
-
-
-\noindent
-Fig.~\ref{fig:sfig}c:  Airbus 380, 2005~\cite{A380Photo}.
-\end{minipage}
-\caption{The evolution of airplane cockpit complexity from 1936 to 2005.}\label{fig:sfig}
-\end{figure*}
 
 The algorithms behind GALE have been presented previously~\cite{krall14aaai,krallphd,galepaper}.
  Those prior reports  focused on runtimes and did not explore the analysis implications of GALE.
 The core contribution of this paper is a case study on how GALE-style reasoning assists 
-in the analysis of cognitive modeling.
-This paper takes a large model of pilot cognition (CDA~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2013}) 
-and explores in detail how GALE's conclusions relate to pilot cognitive workloads and safe aircraft operation within the context of that model.
-As shown in \tion{lfm}, (1)~GALE offers many novel insights into complex cognitive models; (2)~other methods would be so slow to run that it might be impractical to find those insights without GALE.
+in the analysis of
+work to support the design of complex operational concepts involving human operators and automated systems. This paper considers the a simulation framework designed to investigate function allocation schemes early in the operational concept design process (CDA~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2013}) 
+and explores in detail how GALE’s conclusions relate to the effect of function allocation strategy, pilot cognitive control strategy, and operational context impact and safe aircraft operation within the context of that model. 
+As shown in \tion{lfm}, (1)~GALE offers  novel insights into complex cognitive models; (2)~other methods would be so slow to run that it might be impractical to find those insights without GALE.
 
 
 The rest of this  paper is structured as follows.
-\fig{acronyms} lists the frequently used acronyms in this paper.
-\tion{mot} motivates this paper with a review on how cockpits are becoming increasingly more complex. 
 An effective search of the models requires the utilization of automated tools such as the multi-objective objective evolutionary algorithms (MOEAs) discussed in \tion{lfm}.
 These models are intricate and take time to run. 
 One such MOEA is our GALE tool discussed in \tion{cpu} which, in \tion{case} is applied to a large simulation
-of pilots flying a plane.
-We show that GALE can answer cognitive research questions like:
+of pilots flying an automated aircraft under different function allocations.
+We show that GALE can provide insight into research questions like:
 \begin{itemize}
 \item RQ1:  Given a limited maximum human task load capacity, what are the effects to safety assurance when a pilot's workload exceeds his or her capacity?
 \item RQ2:  What are the effects of changing how much pilots rely on automation?
@@ -199,46 +179,35 @@ We show that GALE can answer cognitive research questions like:
 
 
 
-\begin{figure}[!b]
-\small\begin{tabular}{r@{~=~}l}
-CDA&Continuous Descent Approach\\
-CPU & Central Processing Unit\\
-GALE& Geometric Active LEarning\\
-HTM&Maximum Human Task load\\
-MOO& Multi-objective optimization\\
-WMC& Working Models that Compute
-\end{tabular}
-\caption{Acronyms in this paper.}\label{fig:acronyms}.
-\end{figure}
+
 
 
 \section{Motivation}\label{sec:mot}
 
-This work is motivated by the growing complexity of  models. For example, consider a model of pilot behavior.
-As shown in \fig{sfig}a, a cockpit in 1936  was little more than a starter, a yoke, a throttle, pedals, and about a dozen gauges that the pilot could use to monitor airspeed, pressures, engine speed and altitude.  
-A pilot model for that kind of plane would be relatively simple.
-
-By 1953, pilots had access to much more information.  
-Civil transport aircraft now included redundant systems, including a copilot, and the other machinery as shown in \fig{sfig}b. 
-Concepts of operation had to clearly define the roles and the responsibilities of the pilot and copilot. 
-For these kinds of planes, pilot simulation models would be more complex.
- 
-By 2010, aircraft had become computers with wings; e.g. the Airbus 380 cockpit of shown in \fig{sfig}c.
-Autopilots allow the pilot to turn over much of the route planning and control to automation on the flight deck, and instead pilots can now take a more passive monitoring role.
-While automation has certainly helped to reduce the number of aviation accidents~\cite{Coombs2005}, the kinds of errors that lead to accidents has changed.  
-In particular, as shown by the examples in \fig{accident} there have been an increasing number of accidents and of near-misses caused by the pilots' interaction with automation~\cite{Billings1991,Sarter1995,Sarter1997}.
 
 Mitigation for human-automation interaction errors consists primarily of defining concepts of operation in which the roles and responsibilities of the pilots and of the automation are clearly laid out.
-The problem here is that our current generation of cockpit systems are now so complex that, in emergency situations, misunderstandings about the current state and the most important monitoring and control tasks cause life-threatening problems.  
-As a result, there is active research on using models of human-machine interaction in conjunction with model-checking in order to find these aviation cockpit (and control tower) errors at the time of automation design~\cite{Bolton2011,Rungta2013,Gelman2014}. 
-Accessing the interactions between pilots and plans is a difficult task.  
-Collecting enough data about pilots' behavior, repeated for an adequate sample of flight conditions, can take months to years or even decades.  
-Worse, if some conclusion of that study is subsequently challenged, then it is very difficult to reproduce the conditions that led to the original conclusions.
-
-In response to this issue, researchers have built models of behavior of humans performing in those safety critical systems.  
-Using those models, analysts can quickly exercise more scenarios in a reproducible manner.  
+As a result, there is active research on using models of human-machine interaction in conjunction with technologies such as model-checking 
+and simulation~\cite{Bolton2011,Rungta2013,Gelman2014}. 
 For example, researchers at Georgia Tech~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2014,Feigh2014} have developed the WMC (Work Models that Compute) framework.  
-WMC's CDA (continuous descent approach) simulation models the physics of flight and the atomic actions of the pilots and the automation, in the context of prioritization schemes.
+
+\subsection{Work Models that Compute}
+
+
+Work Models that Compute (WMC) is a simulation framework, implemented in C++, for modeling and simulating concepts of operation that involve different function allocations between human operators and their automation. WMC work models are representations of the work a team of human and automated agents need to perform to accomplish the objectives of a concept of operation. The representations of work, or work models, are defined by resources and actions (and functions). Resources describe
+the state of the work environment and actions
+are the processes by which resources, and thus
+the work environment, are accessed and
+modified. Related actions can be aggregated into functions characterizing work serving a specific set of operational objectives.
+
+Agent models in WMC specify the behaviors of an agent in handling taskwork. A basic agent in WMC is able to process actions assigned to it, execute those actions instantaneously, and report the time of action execution. A human performance agent is tailored to be able to address analyzing impacts of human limitations. For example if an action is counted as a unit of capacity for the human agent, the human can get overloaded and may delay actions, or interrupt them for higher priority actions. They may even forget actions altogether.
+
+A human performance agent also may have different degrees of control over a situation. The opportunistic cognitive control mode is defined as ``the case in which the next action is chosen from the current context alone and mainly based on the salient features rather than durable goals or intentions''~\cite{Hollnagel1993}. The agent operating select the next action in response to assessments that are driven by salient features in the environment. The tactical cognitive control mode is defined as the case in which ``the person’s event horizon goes beyond the dominant needs of the present, but the possible actions considered are still very much related to the immediate extrapolations from the context''~\cite[p170]{Hollnagel1993}. Agents are guided by rules or patterns of behavior. The strategic cognitive control mode is defined as the one where ``the person is using a wider event horizon and looking ahead at higher level goals...''~\cite{Hollnagel1993}. The agent plans actions
+to investigate function allocation, work is assigned to agents. A specified invocation of work models and agent models comprise a scenario, and an analyst may test different function allocations and agent parameterizations for the same scenario through scripts.
+
+\subsection{Continuous Descent Approach}
+
+One concept of operation that has been investigated is optimized descent, also know as continuous descent approach (CDA).
+WMC's  simulation models the physics of flight and the atomic actions of the pilots and the automation, in the context of prioritization schemes.
 
 %\begin{comment} XXX
 %Using
@@ -249,7 +218,6 @@ WMC's CDA (continuous descent approach) simulation models the physics of flight 
 CDA can understood by contrasting it with another landing tactic, the {\em standard descent}.  
 In a standard descent, an aircraft must descend via several steps, requesting a new clearance at every step.  
 As a consequence, flight times are longer and more fuel is burned.  
-Also, at lower steps, the aircraft is effectively closer to the city itself, emitting lots of noise as the aircraft passes by.
 As the aircraft reroutes and encircles an airport before a runway is clear to land on, these wait times equate to more noise for the city.
 Additionally, it is harder to fly at lower altitudes due to changes in the atmosphere and wind environments.
 
@@ -258,28 +226,7 @@ This simplifies the communication overhead between radio towers and pilots, and 
 As a result, a continuous descent can more accurately approach the runway, less fuel is burned, and less noise is emitted into the city.  
 \fig{cda_diagram} illustrates the difference between CDA and traditional landing methods.
 
-
-\begin{figure}[!t]
-\small
-\begin{tabular}{|p{.95\linewidth}|}\hline
-In the 2009 Air France 447 crash~\cite{AirFranceFinal2012}, the autopilot disengaged when it lost airspeed data from the pitot tubes.  
-A copilot lost situational awareness, and believed he was in `take-off, go-around' mode, in which the appropriate response is to climb.  
-However, at 38,000 feet, the rate of climb that the copilot was commanding was unsustainable; Air France 447 stalled.
-During the one sequence in which the copilot responded appropriately and dropped the plane's nose, the plane gained enough airspeed that the autopilot started working again and began issuing a stall warning; this effectively punished the copilot for reacting appropriately.  
-Two other, more experienced pilots on the flight deck scanned the many screens and gauges available to them, but failed to notice the fact that the copilot was commanding a climb.  
-One of the pieces of data that might have helped the pilots understand their situation was the plane's angle-of-attack, but this information was available only to the automation. 
-
-Asiana Flight 214 crashed in June of 2013 at the San Francisco International Airport (SFO).  
-The final report suggests that this crash may also have been partly due to confusion about the division of labor between the pilots and the automation~\cite{AsianaFinal2014}.  
-Ground automation at SFO (the precision instrument landing system) was not working, and the pilots of Asiana 214 were asked to fly a manual approach.  
-The plane's tail struck the seawall at the end of the runway; the plane was too slow and too low for landing.  
-Both pilots reported that, until the last few seconds of the crash, they believed the autothrottle was controlling the plane's speed.  
-The autothrottle was in an `armed' position, but was not on.  The pilot flying's flight director (another system for automation in the cockpit) was \emph{deactivated} and the instructor pilot's flight director was \emph{activated}; had the systems been in the same state, the autothrottle would have `woken up'. 
-The flight crew failed to monitor airspeed, and the investigators concluded that fatigue and over-reliance on automation were primary contributors to the accident.\\\hline
-\end{tabular}
-\caption{Two examples of accidents in which complex cockpits played a role.}\label{fig:accident}
-\end{figure}
-
+ 
 
 
 
@@ -301,7 +248,7 @@ The flight crew failed to monitor airspeed, and the investigators concluded that
 \section{Learning From Models}\label{sec:lfm}
 
 
-For analyzing complex models like CDA, we prefer GALE to traditional  optimizers since those optimizers require certain simplification assumptions.
+For analyzing complex models like the WMC representation of CDA, we prefer GALE to traditional  optimizers since those optimizers require certain simplification assumptions.
 For example, if models are simple continuous equations, then they could be readily explored with gradient descent methods such as the Quasi-Newton method (perhaps using the BFGS update rule recommended by Sims~\cite{Sims10}).
 However, all such gradient descent methods assume that the model being explored is essentially continuous. 
 Models like CDA are not continuous since their internal state space is divided into one combination of each branch of each {\em if statement} in the code~\cite{Davies2012}.
@@ -544,16 +491,8 @@ from dozens of models, see \cite{galepaper,krallphd}.
 This case study was designed after reflecting on the following.
 Sometimes, when monitoring cockpit instruments, a pilot is unable to complete all of their required tasks.
 Such lack-of-attention can have adverse consequences on aviation safety.
-It can occur for many reasons, including (1)~fatigue; or
-(2)~unexpected or stressful situations such as:
-\bi
-\item 
-Unexpected flight conditions such as increased tail winds or unscheduled rerouting;
-\item
-Emergency situations (e.g. a threatened near miss with another aircraft);
-\item
-Training situations in which one pilot must monitor a plane at the same time as watching over another, less experienced, pilot.
-\ei
+It can occur for many reasons, including  fatigue; or
+ unexpected or stressful situations.
 \subsection{Goals}
 
 The goals of this study are:
@@ -570,22 +509,19 @@ Our possible mitigations are restricted to the input of our CDA problem space.}
 \subsection{Methods}
 \subsubsection{Apparatus}
 
-This study uses the CDA model as described herein. 
-CDA is a model of pilot interactions: with each other and also with the navigation systems critical to safe flight.  
+ 
+The CDA work model implemented in WMV is a model of pilot interactions: with each other and also with the navigation systems critical to safe flight.  
 CDA employs a continuous descent approach to a runway. 
 As aforementioned, a continuous descent is an alternative to the standard approach to a runway.
 A continuous descent approach is arguably much more efficient in terms of a) fuel economy and cost, b) noise, and c) flight duration.
 
 CDA is packaged within the WMC (Work Models that Compute) suite.  
-%WMC is a tool that was used to generate the CDA model.  
-%This functionality is useful in human factors analysis because 
-WMC has the capability of modeling the way humans select which task to do next.
-In the CDA model, pilots have a handful of requirements and tasks that they must satisfy, and each requirement and task has a given level of priority that affects the order in which it is satisfied.
-WMC also takes into account that humans have a ``maximum human task load" variable which describes how much they can handle.  
+As mentioned, human performance agents in WMC have a ``maximum human task load" variable which describes how much they can handle.  
 If the task load is too large, then some of the workload will not be completed in time, or worse yet, might go forgotten entirely.  
 We use the metrics that describe these problems as the output objectives for GALE, i.e., the dependent variables which are detailed in the subsection just below.
 
-Different strategies of pilot interaction can help alleviate the problems of large task loads.  These different strategies are employed in CDA through its inputs, i.e. the independent variables as described in the next subsection.  
+Also as mentioned, human performance agents in WMC may emply different cognitive
+control strategies to alleviate the problems of large task loads.   
 By studying the different strategies in terms of the output objective scores (the dependent variables), it is possible to understand the safety implications of different strategies and to learn what mitigations might exist (and can be exploited for safety gain).
 
 
@@ -603,45 +539,44 @@ The CDA implementation itself within WMC contains many other inputs (for example
 %\item \textbf{SC}: the  air environment  scenario.  WMC's CDA model includes four different arrival and approach scenarios.
 %\end{enumerate} 
 %\end{changed}
-CDA's four decision variables are:
-\begin{description}
-\item[HTM:] maximum human task load. This value describes how many tasks (where a task is an atomic action) can be maintained in a mental to-do list by a person.  Tasks in the model are assigned a duration and a priority. For a thorough description of this variable, please see~\cite{Kim2011}. When the number of necessary tasks exceeds the number of tasks that the person can maintain, there can be incurred delays, errors, or the possibility of the task being forgotten and lost.
-\item[FA:] function allocation.  This variable refers mainly to the relative authority between the human pilot and the avionics, and is discussed in more detail to follow.
-\item[CCM:] contextual control mode of pilots. These describe the pilots' ability to apply patterns of activity in response to the demands and resources in the environment, and are described in detail below.;
-\item[SC:] the  air environment  scenario.  WMC's CDA model includes four different arrival and approach scenarios.
-\end{description} 
 
-%\begin{changed}
-%   \be
-%   \item{\em Nominal} (ideal) arrival and approach.
-% \item{\em Late Descent}: controller delays the initial descent.
-% \item{\em Unpredicted rerouting}:  pilots  directed to an unexpected waypoint.
-%\item{\em Tailwind}: wind  pushes  plane from  ideal trajectory.
-%\ee
-The four arrival and approach \emph{scenarios} (SC) implemented within the CDA model are:    
+{\em a) Maximum human task load (HTM)}.
+This value describes how many tasks (where a task is an atomic action) can be maintained in a mental to-do list by a person.  Tasks in the model are assigned a duration and a priority~\cite{Kim2011}. When the number of necessary tasks exceeds the number of tasks that the person can maintain, there can be incurred delays, errors, or the possibility of the task being forgotten and lost.
+
+{\em b) Function allocation (FA)}.  This variable refers mainly to the relative authority between the human pilot and the avionics. FA defines the different
+ways the pilots can configure the autoflight controls.
+
+\bd
+\item[{\bf Highly Automated:}] The computer processes most of the flight instructions directly; the pilot only confirms the clearances. This function allocation addresses a possible future concept of operation.
+\item[{\bf Mostly Automated:}] The pilot processes the instructions and programs the autoflight system, but then the autoflight
+system controls the flight path automatically. This mimics current lateral “LNAV” and vertical “VNAV” flight navigation operations.
+\item[{\bf Mixed-Automated:}] The pilot processes the instructions and programs the computer to handle the lateral flight path. The flight crew directly flies uses a lower level of automation for the vertical profile, including the altitude, vertical speed, and airspeed.
+\ed
+
+{\em c) Contextual control mode  (CCM)}. These describe the pilots' ability to apply patterns of activity in response to the demands and resources in the environment. These are based on Hollnagel’s work on representative patterns of activity~\cite{Hollnagel1993}:
+\bd
+\item[{\bf Opportunistic:}] Pilots monitor and perform tasks related to only the most critical functions (monitoring is conducted only when necessary to complete assigned task work).
+\item[{\bf Tactical:}] Pilots cycle through most of the available monitoring tasks, and double check some of the computer’s tasks (periodic monitoring checks are conducted).
+\item[{\bf Strategic:}] Pilots cycle through all of the available monitoring tasks, and try to anticipate future tasks.
+\ed
+
+{\em Scenario (SC)}.
+WMC’s CDA model includes four different arrival and
+approach scenarios. The four arrival and approach scenarios (SC) implemented within the CDA model are: 
 \begin{description}
 \item[Nominal:] (ideal) arrival and approach.
 \item[Late Descent:] controller delays the initial descent.
 \item[Unpredicted rerouting:]  pilots  directed to an unexpected waypoint.
 \item[Tailwind:] wind  pushes  plane from  ideal trajectory.
 \end{description} 
-The {\em function allocation} (FA) defines the different ways the pilots can configure the autoflight controls.  We list the different possible modes within the CDA below, interested readers are referred to~\cite{Pritchett2014} for more details.
-\begin{description}
-\item[Highly Automated:] The computer processes most of the flight instructions directly; the pilot only confirms the clearances.
-\item[Mostly Automated:] The pilot processes the instructions and programs the autoflight sytem, but then the autoflight system controls the flight path automatically.  This mimics current ``LNAV" and ``VNAV" flight operations.
-\item[Mixed-Automated:] The pilot processes the instructions and programs the computer to handle the lateral flight path. The flight crew directly flies the vertical profile, including the altitude, vertical speed, and airspeed.
-\end{description} 
+
+ 
 %    \be
  %   \item{\em Highly Automated:} The computer processes most of the flight instructions directly; the pilot only confirms the clearances.
  %   \item{\em Mostly Automated:} The pilot processes the instructions and programs the autoflight sytem, but then the autoflight system controls the flight path automatically.  This mimics current ``LNAV" and ``VNAV" flight operations.
  %   \item{\em Mixed-Automated:} The pilot processes the instructions and programs the computer to handle the lateral flight path. The flight crew directly flies the vertical profile, including the altitude, vertical speed, and airspeed.
 %    \ee
-CDA also knows of three different pilot {\em contextual control modes} (CCM).  These are based on Hollnagel's work on representative patterns of activity~\cite{Hollnagel1993}. For more information on how these CCM's are implemented as sets of actions within WMC, please refer to~\cite{Feigh2014}.
-\begin{description}
-    \item[Opportunistic:]  Pilots monitor and perform tasks related to only the most critical functions.
-    \item[Tactical:] Pilots cycle through most of the available monitoring tasks, and double check some of the computer's tasks.
-    \item[Strategic:] Pilots cycle through all of the available monitoring tasks, and try to anticipate future tasks.
-\end{description} 
+ 
 %    \be
  %   \item{\em Opportunistic}:  Pilots monitor and perform tasks related to only the most critical functions.
  %   \item{\em Tactical}: Pilots cycle through most of the available monitoring tasks, and double check some of the computer's tasks.
@@ -652,8 +587,7 @@ CDA also knows of three different pilot {\em contextual control modes} (CCM).  T
 
 \subsubsection{Dependent Variables}
 
-CDA's five objectives  keep track of how many tasks were delayed, interrupted or forgotten entirely (which impacts the relative safety of the flight itself).  
-We summarize these metrics below; the interested reader should see~\cite{Kim2011} for full details. 
+CDA's five objectives  keep track of how many tasks were delayed, interrupted or forgotten entirely (which impacts the relative safety of the flight itself)~\cite{Kim2011}. 
 Better pilot organizational structures can be found by exploring different inputs of CDA to optimize these goals so that safety is improved:
 \begin{description}
 \item[Num Forgotten Actions:] tasks forgotten by the pilot. When the number of tasks expected of the pilot exceed the HTM, tasks with the lowest priority are `forgotten'.
@@ -672,13 +606,12 @@ Better pilot organizational structures can be found by exploring different input
 %\ee
 %\end{changed}
 
-In CDA, the HTM (maximum task load) variable controls how many tasks a pilot can either perform or hold in working memory.
+\subsubsection{Experimental Design}
+
 In all the following, CDA was run for varying and decreasing values of HTM.
 For each HTM value, we collect:
 \bi
-\item {\em The  baseline objective scores} seen in CDA. Recall from the above that those baseline values relate to number of
-forgotten actions; delayed actions; interrupted actions;
-total interrupted time; etc.
+\item {\em The  baseline objective scores} seen in CDA. 
 \item {\em The treated objective scores} seen in CDA. These treatments are learned
 by GALE and represent the best case actions that could be performed by pilots
 to mitigate against the lack-of-attention problem.
@@ -693,15 +626,15 @@ When analyzing CDA, GALE was run using  parameters found to work best on several
 To control for random effects during optimization, all scores are the mean values of 20 repeated runs of {\em baseline} or  the model {\em treated} with GALE's conclusions.
 
 \subsubsection{Data Analysis}
-Originally, we only planned one experiment, called {\em Experiment \#1},  to compare {\em baseline} and {\em treated} by letting GALE select any inputs across the full range of all CDA input values.
-
-\begin{changed}
+We  compare {\em baseline} and {\em treated} by letting GALE select any inputs across the full range of all CDA input values.
+ 
 That first experiment found a curious threshold effect: underneath a certain HTM point, all the best decisions concerned a particular contextual control mode.  
-As described above, in {\em Opportunistic} mode, pilots monitored and performed tasks related to only the most critical functions in the cockpit. 
-That is, in this mode, pilots executed only the most essential monitoring actions according to the CDA model (e.g. monitoring altitude and monitoring descent airspeed), and focused primarily on adjusting the lateral profile.  For full details, see~\cite{Kim2011}, pages 110-135.
-\end{changed}
+In  {\em Opportunistic} mode, pilots monitored and performed tasks related to only the most critical functions in the cockpit. 
+That is, in this mode, pilots executed only the most essential monitoring actions according to the CDA model (e.g. monitoring altitude and monitoring descent airspeed), and focused primarily on adjusting the lateral profile.  
+ 
 
-To  understand the impact of this {\em Opportunistic} mode, an {\em Experiment \#2} was conducted, exactly like Experiment \#1, but with the {\em Opportunistic} mode  disabled.
+To  understand the impact of this {\em Opportunistic} mode, a followup  
+experiment   was conducted,  with the {\em Opportunistic} mode  disabled.
 
 \subsubsection{Sanity Checks}
 We define two  sanity checks on our results:
@@ -999,29 +932,27 @@ If this were otherwise, that would suggest that MOEAs like GALE are not useful h
 
 %% The results from~\cite{galepaper}, ~\cite{krallphd} suggest that GALE is a very effective tool for optimization and can outperform NSGA-II and SPEA2, thus making GALE a good fit even for small models which run fast with any search tool.  For the large models, GALE was much faster, boasting speedups greater than 100 times faster.  In this paper, it is noted that GALE was a necessary tool for further exploring CDA due to the runtime constraints of the model.  Instead of six months of calendar time to run just one of NSGA-II or SPEA2, GALE can do the same job at the same quality in just 83 hours.  In the next section, the CDA model is discussed before moving on to experimental procedures.
 
-
 \begin{figure*}
 \begin{center}
 
 \includegraphics[width=4.5in]{figures/GALE,decisions,Opp}
-
-\fig{all}a:  Exp \#1. Decisions found by GALE,  all contextual control modes enabled.
+ 
+~\\
 
 \includegraphics[width=5.25in]{figures/objectives,Opp}
-
-\fig{all}b: Exp \#1.  Objectives obtained, all contextual control modes enabled.
+ 
 \end{center}
-
-\caption{Experiment \#1: All contextual control modes enabled. 
+\caption{  All contextual control modes enabled. 
 Forgotten, delayed, and interrupted actions are reported by the simulation at each 0.05s time step.  
-E.g. a monitoring action can be `forgotten' 20 times each second.  }\label{fig:all}
+a) Decisions found by GALE; b) Objectives obtained. }\label{fig:all}
 \end{figure*}
 
 \section{Results}
-\subsection{Experiment \#1: Results}
-\fig{all} and \fig{some} show the results of these two experiments.
+\subsection{ Results with Opportunistic CCM}
+\fig{all} summarize
+the results.
 As an aid to help visualization, bar graphs are added to each column (and the bar with the largest, smallest value shows the max,min values in the column).
-In those figures, GALE's decisions are shown at top.
+GALE's decisions are shown at top.
 Beneath that, we show two sets of objective scores:
 \bi
 \item {\em The baseline runs} which are the average objective scores seen without using GALE (just from randomly selecting input decisions).
@@ -1039,7 +970,7 @@ When reading these results, it is insightful to look for {\em saturation}, {\em 
 
 Values {\em saturate} when they are driven towards their theoretical maximum. 
 In the case of the CDA objectives, any {\em Time} objective that occurs at 60 seconds per minute is {\em saturated}. 
-Such saturation can be observed in the {\em avg Interrupted Time} and the {\em avg Delayed Time} values of 60 at  $\mathit{HTM}=1$ in \fig{all}b and \fig{some}b.
+Such saturation can be observed in the {\em avg Interrupted Time} and the {\em avg Delayed Time} values of 60 at  $\mathit{HTM}=1$ in \fig{all}b .
 
 In terms of a pilot maintaining safe operations, saturation is highly undesirable. At saturation, a pilot is permanently interrupted for all tasks so everything gets delayed.  
 Note that this saturation result satisfies  one of our {\em sanity checks} (that less HTM leads to more problems).
@@ -1067,9 +998,6 @@ Those mitigations are shown in \fig{all}a.
 
 Several columns in \fig{all}a and \fig{some}a contain nearly all zero values. That is they are mostly {\em absent} from the recommendations made by GALE.
 
-Sometimes, these absences are not informative.  
-For example, in \fig{some}a, the absent values in {\em OPP} are the result of that experiment (this mode was disabled for that experiment).
-But other absent columns are more interesting:
 \bi
 \item
 A {\em MIX}ed level of autonomy was rarely useful, suggesting that the simulated pilots should very rarely program the computer to handle only some of the airplane instructions.
@@ -1077,8 +1005,7 @@ A {\em MIX}ed level of autonomy was rarely useful, suggesting that the simulated
 Similarly, the {\em STR} strategic cognitive control mode was also rarely used.
 From this result, we say that, in this model, pilots should avoid cycling through all of the available monitoring tasks while trying to anticipate future tasks.
 \item Other absent columns can be seen in the scenarios GALE found it could handle. 
-In \fig{some}b, GALE found that when opportunistic mode was disabled, it rarely could handle the {\em LATE} approach or high tail {\em WIND} situations.  
-On the other hand, when opportunistic model was enabled, GALE's recommendations to the simulated pilot could handle all the {\em Scenario}s (see all the non-zero numbers in the {\em Scenario} columns of \fig{all}b).
+GALE's recommendations to the simulated pilot could handle all the {\em Scenario}s (see all the non-zero numbers in the {\em Scenario} columns of \fig{all}b).
 \ei
 
 
@@ -1099,7 +1026,7 @@ However, above that point (for $\mathit{HTM}>3$), it is rarely selected.
 This cliff is a large enough effect in  a critical range of the model to deserve special attention.
 Accordingly, Experiment \#2 (discussed below) explores the the relative merits of opportunistic control versus other modes.
 
-\subsection{Experiment \#2: Disabling Opportunistic Mode}
+\subsection{Results with Dsiabling  Opportunistic CCM}
 As shown in \fig{all}a, at low HTM levels of $\mathit{HTM}<4$, most of GALE's recommended actions use the opportunistic cognitive control mode (where pilots monitor and perform tasks related to only the most critical functions). 
 To see if this was some quirk of the simulation, or an important effect, we repeated the above experiment with this opportunistic mode disabled.
 
@@ -1118,19 +1045,17 @@ From these results, we say that opportunistic mode is an essential tool for comb
 \begin{figure*}
 \begin{center}
 \includegraphics[width=4.5in]{figures/GALE,decisions,noOpp}
-
- \fig{some}a:  Exp \#2. Decisions found by GALE, opportunistic mode disabled.
-
-
+ 
+ ~\\
 
 
 \includegraphics[width=5.25in]{figures/objectives,NoOpp}
-
-\fig{some}b:  Exp \#2. Objectives obtained, opportunistic mode disabled.
+ 
 \end{center}
 
-\caption{Experiment \#2: Opportunistic mode disabled. 
-See \fig{all} for a description of how the tasks are counted.}\label{fig:some}
+\caption{Opportunistic mode disabled. 
+Forgotten, delayed, and interrupted actions are reported by the simulation at each 0.05s time step. a) Decisions found by GALE; b) Objectives obtained.
+}\label{fig:some}
 \end{figure*}
 %% \section{Analysis of Data}
 
@@ -1185,9 +1110,10 @@ going astray.
 During this period, we were grateful that GALE was only making $O(log(N))$ evaluations per generation since the $O(2N)$ evaluations used by standard optimizers would have led to an overwhelming amount of data.
 
 Also note that after commissioning the model came {\em generating conclusions}.
-This required 20 repeats of all models for baselines and with GALE, repeated for HTM set from one to eight, then repeated twice (for Experiment \#1 and \#2). 
+This required 20 repeats of all models for baselines and with GALE, repeated for HTM set from one to eight, then repeated twice
+with and without the opportunistic CCM.
 With GALE, those runs took 83 hours and with NSGA-II, those runs would have taken much longer.
-Based on some samples we made of NSGA-II performing parts of Experiment \#1, we estimate that if NSGA-II was used for the above experiments, then that would have taken 6 months.
+Based on some samples we made of NSGA-II performing parts of running with the opportunistic CCM, we estimate that if NSGA-II was used for the above experiments, then that would have taken 6 months.
 
 
 As to the external validity of this work,
@@ -1196,7 +1122,6 @@ If these tools are somehow distorted or biased then our conclusions would be dis
 That said,
 there is enough  prior work on CDA and GALE  to make the case that it useful to study the CDA model with the GALE optimizer.
 We note that these tools are the products of years of research and much analysis and testing ~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2013,Pritchett2014, Feigh 2014,krall14aaai,krallphd,galepaper}. 
-CDA is one of the largest and most studied models of pilot cognition currently available.  
 Given the resources spent on its construction, it seems prudent and timely to learn what we can from that model.
 
 %% Also, as to GALE, this algorithm uses a guided $log(N)$ heuristic to explore a space of $O(2N)$ possible comparisons (for details on this approach, see \tion{gale}). 
@@ -1244,8 +1169,9 @@ For nearly all levels of HTM, it was sufficient to rely on a {\em MOST} level of
 However, in extreme situations ($\mathit{HTM}=1$), that recommendation is not supported.  
 For such very low levels of HTM, our simulated pilots should switch to {\em HIGH} levels of automation to ensure aircraft safety.
 \begin{changed}
-This recommendation intuitively makes sense if we assume that the automation works as the pilot intends.
-Automation failures and automation surprise are beyond the scope of our study; we note that the creators of WMC have recently published a study with a version of their model tuned to study automation surprise~\cite{Gelman2014}.
+This recommendation intuitively makes sense if we assume that the automation works as the pilot intends
+and that the pilot understands how it works.
+ We note that the creators of WMC have  published a study with a version of their model tuned to study automation surprise~\cite{Gelman2014}.
 \end{changed}
 
 \subsection{RQ3: Pilot Monitoring Policies}
@@ -1256,8 +1182,9 @@ simulated pilot to handle and opportunistic control mode was essential to mitiga
 
 \begin{changed}
 More validation should be done before applying the recommendations we make here for the CDA model to the real-world safety problems that have inspired both CDA and this study.
-However, our findings intuitively make sense.
-In both the AirFrance and Asiana accidents that we used in our motivation, a key finding was that the pilots became distracted by off-nominal behavior, and {\em failed to monitor} the most important flight state information (e.g. airspeed, altitude and attitude).
+Accidents such as Air France 447~\cite{AirFranceFinal2012} and 
+Asiana Flight 214~\cite{AsianaFinal2014} show that
+the pilots became distracted by off-nominal behavior, and {\em failed to monitor} the most important flight state information (e.g. airspeed, altitude and attitude).
 When stressed, pilots are asked to do something very like the opportunistic mode as implemented within the CDA model---worry about the key monitoring and flight tasks first.
 \end{changed}
 
@@ -1301,8 +1228,7 @@ endorsement by the United States Government.
 \newpage
 \begin{IEEEbiography}[{\includegraphics[width=1in,clip,keepaspectratio]{images/joe.png}} ]{Joseph Krall}
 (Ph.D., WVU)
-is a Postdoctoral Research Fellow funded by the National Science Foundation and is employed  at
-LoadIQ, a high-tech start-up company in Reno, Nevada that researches and investigates cheaper energy solutions.
+is J chief data scientist at LoadIQ, Reno, Nevada, a high-tech start-up that researches and investigates cheaper energy solutions.
 His research relates to the application of
 intelligent machine learning and data mining algorithms to solve NP-Hard classification problems.
 Further research interests lie with multi-objective evolutionary algorithms, 
@@ -1310,20 +1236,7 @@ search based software engineering, games studies, game development, artificial i
 \end{IEEEbiography}
 
 \begin{IEEEbiography}[{\includegraphics[width=1in,clip,keepaspectratio]{images/timm.jpg}}]{Tim Menzies} (Ph.D., UNSW)
-is a Professor in CS at NcState and  the author of
-over 200 referred publications. In terms of citations, he is one of the top 100 most
-most cited
-authors in  software engineering (out of 54,000+ researchers, see
-http://goo.gl/vggy1). In his career, he has been a lead researcher on
-projects for NSF, NIJ, DoD, NASA, as well as joint research work with
-private companies. He teaches data mining and artificial intelligence
-and programming languages. Prof. Menzies is the co-founder of the
-PROMISE conference series (along with Jelber Sayyad) devoted to reproducible experiments in
-software engineering: see http://promisedata.googlecode.com. He is an
-associate editor of IEEE Transactions on Software Engineering. the Empirical Software Engineering Journal, and the
-Automated Software Engineering Journal.  For more information, see his web site http://menzies.us
-or his vita at http://goo.gl/8eNhY or his list of publications at
-http://goo.gl/8KPKA .
+is a Professor in CS at NcState  His research interests include software engineering (SE), data mining, artificial intelligence, and search-based SE, open access science. 
 \end{IEEEbiography}
 
 
@@ -1337,290 +1250,10 @@ http://goo.gl/8KPKA .
   performance, and cost. Her approach combines
   nascent ideas within systems theory and within the
   mathematics of multi-scale physics modeling.
-For more information, see her web site http://ti.arc.nasa.gov/profile/mdavies
-or her  list of publications at
-http://ti.arc.nasa.gov/profile/mdavies/papers.
 \end{IEEEbiography}
 
 \clearpage
 
-\section*{Response to Reviewers}
-
-\subsection*{Associate Editor's Comments}
-
-
-Here are my suggestions
-
-1.      Focus section 1 on GALE and its potential use in optimization of  models and do not focus on WMC or CDA at all. Explain that GALE could be used to analyze cognitive models that in general are very complex and thus could use model-based analysis frameworks such as GALE to make analysis more tractable.
-
-{\em Yes. And following on from your suggestions, we moved much of section 4 into section1.}
-
-2.      Delete section 2. I find it really is distracting. Pull the idea that there are too many analyses to run from section 2 into the new introduction but all the information about cockpit automation history and the 2 aviation examples are not necessary.
-
-{\em Here, I'd like to push back just a little on your
-editorial suggestions. 
-
-Certainly, this section can
-be extensively shortenned, and this draft does that. 
-
-But I want
-to point out that you work in this field and hence
-you do not need a strong motivation to read this
-paper.  
-
-Please consider another kind of reader, one
-who is only tangentially connected with this
-work. That reader would need some "gentiling" in
-order to read this article. For example, in terms of
-supplying that motivation to read the paper, I
-really like the phrase "a modern airplane is really
-a computer with wings" and those graphics of
-increasining fearsome cockpit complexity.
-
-}
-
-3.      Delete the current Section 3 (it should go into a case study)
-
-{\em Agreed. We've wound an intro to CDA into the motivation section of 
-the revised section 2.
-
-}
-
-4.  The current section 4 should really be section
-2. However the material at its start about
-model-based approaches should be moved to the new
-introduction. Get rid of the discussion of what you
-will explore later in the paper from section
-2. Again no CDA, HTM, FA CCM and SC material should
-go there. From 4.1 delete all of the material about
-Kim’s thesis. The text in 4.1 could be very
-short. The text up until “the problem here” could
-just say simulations with many input parameters grow
-in factorial space and there is a need for efficient
-modeling techniques.
-
-{\em Yes. Done.}
-
-5.      I can’t really comments on Section 5 because this is your technology. However again take out all the CDA and WMC portions.
-
-{\em Yes: and there is one para from there that works **much** better in the introduction anyway}.
-
-6.      Now the new section 3 should be the methods for your case study and the new section 4 should be the results of your case study.
-
-{\em Not quite, since I'm still trying to retain section2. But I think I've followed the spirit, if not the letter, of your suggestions}
-
-7.      This new methods section should read like a methods section where you have apparatus, independent variables, dependent variables, data analysis and so on. In the way I read your paper, the WMC simulation was used to create data sets that you analyze using GALE. If I am incorrectly understanding this, of course then correct me. If I am right, you could explain WMC, the CDA model, the parameters it uses and the data set it creates in each run in an apparatus section. The dependent variables and independent variables sections would be those used by GALE. The data analysis part really  is the part where you describe how you ran GALE (pop size of 100 and so on).
-
-
-{\em That ``Methods'' section is now divided as you said and  contains 
-five sub-headings: (1) apparatus, (2) independent variables;
-(3) depednent variables; (4) data analysis and (5) sanity checks.
-
-}
-
-8.      In your new results section you would have a subsection for exp 1 and one for exp 2
-
-{\em Done}
-
-9.      Section 6.6, 6.7 and Section 7 look like what should be in a discussion section
-
-{\em Done.}
-
-10.  Section 8 can also be deleted
-
-{\em Ok}
-
-I totally get it if you find this really annoying
-but I hope you take these comments as a way to make
-your paper relevant to the journal’s readers. I
-think it could be shorter and focused on the story
-you are trying to tell.
-
-{\em No problem. Great to work with an editor that takes so much care and consideration!}
-
-
-%% The present version of the manuscript is, I believe, close, but not quite at the point where it is ready to be published.  Reviewer 2 indicates that you have addressed all of his previous issues.  Reviewer 1 has a few very minor issues still to be addressed.  In contrast, Reviewer 3 identified many more issues to be addressed.  However, I believe that all of the issues, even the ones that Reviewer 3 can be handled with a very straightforward revision.  Most of the requested revisions involve clearer definitions, updates to information, and improved wording.  None require new analyses or reconceptualization of any section of the document.  Having noted that these revisions should be straightforward, let me also point out that they will improve the readability of your manuscript.
-
-%% \begin{changed}
-%% Thank you for these comments. As you say, the revisions for Reviewer1 and Reviewer2 are a simple matter.
-
-%% As to Reviewer3, we really should have been clearer in the last draft on many points (see our remarks, below).
-
-%% Note that all significant changes to this version are shown in blue.
-%% \end{changed}
-
-
-%% \subsection{Reviewer1 Comments}
-
-%% Some more details about the case study implementation would be useful to facilitate the analysis of the results. 
-
-%% Particularly, the impact on the recommended actions and GALE optimization results, between the different Cognitive Control Modes should be provided.
-
-%% Some details about the comparison of GALE with standard optimization methods (NSGA-II) would be important to support the claimed research contribution.
-%% \begin{changed}
-
-%% We have added text throughout the paper on the case study implementation, and we have also included additional citation information for those who would like more details.
-
-%% We have paid special attention to a clearer description of GALE's recommendations, particularly as they relate to the Contextual Control Modes.  (Per another reviewer's comment, we have more clearly recognized Hollnagel's contribution to the model by changing our terminology.  Cognitive Control Modes have become Contextual Control Modes throughout the paper.)
-
-%% Thank you for the remark on the comparison of GALE to other optimization methods-- the previous version was weak on the connection of this approach to other MOEAs. We have added some notes on this topic on page 5 (please see the BLUE text there).
-%% \end{changed}
-
-%% \subsection{Reviewer 2 Comments}
-
-%% Since this was a collection of papers that support the use of model-based analysis of human factors for safe aircraft approach the weakness that a reader may find is that there are parts in the later two papers that are repeated and/or glazed over. This is understandable with a compilation of three papers that were all designed initially to stand independent of each other. Without combining the entire collection of papers into a single work there is little that can be done to mitigate this redundancy regardless of its effect on the reader. 
-%% \begin{changed}
-%% Thank you for your understanding. As we said on page 1, this is not the paper that offers full details on GALE and we suspect that, like you, the interested reader will read on to the other papers.
-%% \end{changed}
-
-
-%% This title paper (first in the collection) did have a few grammar mistakes that are recommended to be resolved prior to the publishing of the piece.
-
-%% \bi 
-%% \item Paper 1 - Section 6.3.1: [Col 1|Line 34]: “where” should be “were”
-%% \item Paper 1 - Section 6.3.2: [Col 1|Line 45]: “then” should be “where”
-%% \ei
-%% \begin{changed}
-%% Typos fixed. Thank you for pointing those out.
-%% \end{changed}
-
-%% \subsection{Reviewer3 Comments}
-
-%% I recommend the following:
-
-%% 1)      Clearly define and operationalize your decision variables / inputs
-%% HTM:  It is not clear what HTM is – presumably it stands for Human Task Load Maximum (but please confirm).  It is described as “an integer value ranging from 1 to 8, in which its value describes how many tasks can be handled at once before there are incurred delays, errors, or the possibility of the task being forgotten or lost”.    However, the number of pilots tasks can handle at once depends on the task and the resource modality.  For example, I can do two things at once if they require difference resources  (i.e. view a display and manually control aircraft), but I cannot do two tasks at once if they require the same resources (i.e. make two different verbal callouts at the same time).  How is this accounted for in the model?  I don’t think any human operator can do 8 tasks at once …. Maybe you should define what you mean by ‘task’ and ‘at once’.
-
-%% \begin{changed}
-%% HTM was defined both in Figure 2 as an acronym for this paper, and also as one of the decision variables (in bold) in the description of CDA in Section 3.  You are correct that it stands for maximum human task load.  We have expanded the definitions of the four decision variables, which will hopefully lead to less confusion for future readers.  
-
-%% Per your recommendation, we have also made it more specific as to what we mean by 'task', and have provided the reference for the in-detail description (which takes many pages in the original reference). 
-%% \end{changed}
-
-%% Functional Allocation.  The distinction among the three categories of FA  (highly, mostly, and mixed) are unconventional (from the literature) and not clear. For example, in mixed-automation which tasks were ‘handled’ by the computer and how is that determined? It is not clear how Highly and Mostly are different.   I am confused by the wording ‘processes the instructions’ vs. ‘handle the task’.  Maybe some examples would help. How can the computer ‘process’ flight instructions in the highly condition, if they were not first programmed by the human.  And then, how is that different than mostly automated?  Not clear what is the difference between Mostly and Mixed.  What are examples of instructions that the computer handles in Mostly that the human handles in Mixed?
-
-%% \begin{changed}
-%% We have added text to make it clear what we mean by these function allocation levels, and also have added references for the interested reader.
-%% \end{changed}
-
-%% The definition of the CCMs are unconventional – I assume you are using Hollnagel’s Contextual Control Model as the basis for your work, despite that it is not referenced and you call it Cognitive Control Modes, not Contextual Control Modes.  As an example, you define ‘Tactical’ as “Cycling through most of the available tasks and double-checking some of the computer’s tasks”.  where as, Hollnagel defines it as follows:  “Tactical  is characteristic of situations where the person’s event horizon goes beyond the dominant needs of the present, but the possible actions considered are still very much related to the immediate extrapolations from the context.” (Hollnagel, 1993, pp. 170)” .  How do you reconcile the difference in definitions? How do you operationalize ‘most’ and ‘some’, how does the model decide with tasks to ‘cycle through’ and which to ‘double check’, and what is the difference between cycling and double-checking?
-
-%% \begin{changed}
-%% You are correct.  The implementers of WMC used Hollnagel's work as a basis for the model. We were working from a thesis that referred to these as cognitive control modes, but they are based on Hollnagel's Contextual Control Modes.  We have cleaned up the text to reflect this, and have also provided references to texts in which the exact implementation of these within WMC is described.
-%% \end{changed}
-
-
-%% Section 6.3.1, page 7.  …”Pilots made their own estimation on what where[sic] the most critical instruments to watch, and ignored all other.”  Since there were no actual pilots in this experiment, and it was a modeled-pilot was making the decisions – what criteria did the model use to decide what instruments to monitor?  For Example, Chris Wickens has a 4 parameter model called SEEV, which suggests pilots consider Salience, Expectancy, Effort, and Value – what did your model use?
-
-%% \begin{changed}
-%% You are correct that we should have been more specific -- the CDA model ranks the priorities of the monitoring tasks.  We have summarized the model assumptions and provided a reference.
-%% \end{changed}
-
-%% 2)      Clearly define your 5 Objectives
-%% Modeling whether tasks are delayed, interrupted, or dropped, is a complex problem – with several different possible strategies  (first in-first out, priority, criticality, salience etc).  How do you operationalize ‘forgotten actions’.  Does your model have a memory component?  Do you model long-term, short-term memory?  Do you use linear or exponential decay curves?
-%% How do you operationalize interrupted tasks.  Is there a prioritization scheme.  Do you use first in first out, last in first out, prioritize by importance,  criticality? There is no discussion as to how this is modeled.  And since this is a major part of the output, it is hard to make sense of the output.
-
-%% \begin{changed}
-%% We've expanded the objective description, briefly discussed the priority scheme and memory model, and added citations.  
-%% \end{changed}
-
-%% 3)      Some clarification needed in  Results
-%% Figure 6,page 8.  I am not understanding Number of Forgotten Actions per minute.  How can an operator ‘forget’ 1087 actions per minutes? How can there be 1087 actions in any given minute to be forgotten?  Please define what you mean by ‘action’.
-
-
-%% \begin{changed}
-%% The same task can be 'forgotten' at each time step -- many times in one minute.  We've added a description to the captions of both Figure 6 and Figure 7.
-%% \end{changed}
-
-%% Section 6.4.2 (bottom of section).  “The good news is that saturation can be avoided.  In Figure 6b, if the simulated pilots following GALES’s advice, they never saturate at HTM=1.”  It is unclear what  GALE’s advice was – or how a pilots would follow it.  In other words, you claim to have a found a mitigation that would be useful for pilots – but what is it????
-
-%% \begin{changed}
-%% We claim to have found a mitigation that is useful for the simulated pilots, not real pilots.  We will leave it to others (or perhaps to future work) to validate and to improve the WMC CDA model.  At HTM1, in figure 6a, you see that GALE decided that the simulated pilots should fly with high levels of autonomy and in the opportunistic contextual control mode.  The Scenario, for this case, mattered less (although it looks to me like the tailwind was harder to fly).  We believe the interpretation of the figure 6a is obvious, and that the results are consistent with common sense.
-%% \end{changed}
-
-%% Section 6.4.3  “.. GALE could learn mitigations that compensate for pilots’ control struggles.  Those mitigations are shown in Figure 6a”
-
-%% \begin{itemize}
-%% \item How do we know which of those mitigations in 6a are having the effect ? 
-%% \item How is Scenario a mitigation?
-%% \item How is CCM a mitigation – you can’t program a human to behave in opp, tac, or str modes.
-%% \end{itemize}
- 
-%% \begin{changed}
-%% 1st item: Level of autonomy, scenario, and CCM are inputs to this simulation. You can see, in 6a, which decisions GALE chose.  In 6b, you can see the results of those decisions on the output.  
-%% 2nd item: GALE suggests: if you can only hold one item in memory, avoid flying with a strong tailwind. GALE can suggest this because the Scenario is an input to the simulation.  The simulation is not reality.  Also note that, even in the simulation, the Scenario mattered relatively little to the simulation.  As one example, GALE chose the normal and the late scenarios equally often in its optimization for HTM=1.  We do plan on future work in which we fix the Scenario (you are correct that, naively, this should more closely represent reality), and identified that with the first sentence in Section 8.
-%% 3rd item:  We respectfully disagree that you can't program a human.  We believe that this programming is called \em{training}.
-%% \end{changed}
-
-
-%% 4)      Carefully review your conclusions and tie your model results to practical, mitigations that can actually be implemented.
-
-%% For example, on Page 10, top left “From these results, we say that opportunistic mode is an essential tool for combatting the problems associated with low HTM”.  How is OPP a “tool”?  You can’t hand it to a pilot and tell them to use it.  CCM is a result of the context / environment  (e.g. if pilots are not fatigued, well-trained,  carrying out a nominal descent in good weather, they can act opportunistically, yet when one more of these factors are applied, the pilot shifts to tactical or strategic modes).  In other words CCM is a RESULT of the factors you model (taskload, off-nominal events), it does not MITIGATE them.
-
-
-%% \begin{changed}
-%% We believe very strongly that tying our results given the simulation to recommendations that should be implemented in reality is overreaching. The simulation still needs more validation.  While the creators of the WMC framework are working very hard both to validate and to improve their models, as evidenced by their impressive recent results and publications, it is our understanding that there is no current computer model that is well-validated enough to be used to provide recommendations to real pilots.  Such models can only suggest experiments to be performed with pilots in-the-loop.
-
-%% OPP is a mode that can be can be selected as an input to the simulation.  Our results showed that if the pilot had  a working memory of one, they should switch to an opportunistic control mode (within the simulation).  If the simulation has a direct correlation with reality, the analagous action would be to train the pilot to operate in this way:  let the computer handle most of the flying (high level of autonomy), and switch to opportunistic mode (just pay attention to a few key actions).  We believe such modes of operation can be trained. CCM and Autonomy level are definitely mitigations in the context of the simulation.  While we have just speculated for your benefit as to how they could also be mitigations in the context of reality, we emphasize our earlier point about the necessity of further validation.
-%% \end{changed}
-
-%% Concluding that low HTM levels are especially dangerous to aircraft is not particularly helpful. What have we learned from this that will  make aviation safer?  We shouldn’t hire pilots that can only handle 1 item at a time?  I think what we need to answer is: What do we know about the context that results in pilots not being able to handle more than 1 task at a time?
-
-
-%% \begin{changed}
-%% We agree that the question you posed is a very important research question to solve, and likely to be much more valuable from an aviation safety perspective than the one we address in our paper.  Your question is beyond the scope of this paper, and beyond the model's ability to capture (according to our understanding).
-%% \end{changed}
-
-%% Saying that “MIX is almost never a good approach” is over-reaching.  MIX as modeled was not good, but it was not clear how it was modeled.  Maybe the model had the computer do the wrong tasks?
-
-
-%% \begin{changed}
-%% Our results must be interpreted in the light of how each of these options were modeled in the simulation.  Again, we are not stating that these are good results for reality (yet).  In order to make recommendations about reality, we need an extra validation step.
-%% \end{changed}
-
-%% Page 8, bottom left.  Concluding “Pilots should avoid cycling through all of the available monitoring tasks while trying to anticipate future tasks”  Calls into question the validity of this study.   Do you seriously anticipate that being part of an airline’s training protocol: “Do not act strategically”.
-
-
-%% \begin{changed}
-%% This study is not (yet) about reality.  Note that, in future work, we plan to measure flight deviations and other safety-related output metrics.  Our results say, for this model, if you want to minimize forgotten and interrupted actions (and associated delays) then don't cycle through all of the tasks and anticipate future ones.  Once we have added other safety metrics, I expect the landscape of what you should do will become more complicated, even within the context of the model alone.  Personally, we think the fact that we automatically discovered that high levels of autonomy and an opportunistic mode of operation decrease the number of forgotten and delayed actions appeals to common sense and makes the study more likely to valid -- certainly in the context of the simulation and perhaps in the context of reality, as well.
-%% \end{changed}
-
-%% Figure 9, bottom left. I think it is a bit of a leap to conclude: “when cognitively limited pilots should trust their machines”.  The decision to trust a machine or not should be based on properties of the automation that make is trust-worthy (e.g. reliability, false alarm rate etc).  One should have no reason to trust automation more when they are cognitively limited than when they are not cognitively limited.
-
-
-%% \begin{changed}
-%% Our notes above on the scope of our effort (e.g. results apply only to this simulation, and only for the output metrics we listed) apply here as well. That being said, we have softened our language throughout the paper to make it clear that we are not overreaching our scope.
-%% \end{changed}
-
-%% 5)      Relate your model results and conclusions back to the two case-studies your presented in the intro.
-%% It is not clear to me how your analysis of workload, cognitive control modes, or function allocation could either ‘explain’ or ‘predict’ either the Air France or Asiana accidents you cite as motivation in your introduction.  Can you tie these back into the discussion?  You attributed the Asiana accident to pilots mis-understanding the automation.  It is not clear that any of your variables – taskload, autonomy levels, cognitive control modes shed any light on whether a pilot misunderstands information.
-
-
-%% \begin{changed}
-%% You are correct that we should have more clearly tied our results back to our motivation.  We have done so.  You are also correct that none of our variables can predict whether a pilot misunderstands information.  We have made our scope clearer throughout the paper.
-%% \end{changed}
-
-%% And some odds and ends:
-%% Please revisit your review of the Asiana Flight 214 crash that starts on page 2 and determine if it can be updated since more information is known now about that accident.
-
-
-%% \begin{changed}
-%% Thank you. We have done so.
-%% \end{changed}
-
-%% Page 6, Section 6.1 and 6.2.  You set up your study with a goal of understanding pilots’ “lack of attention” – this wording puts blame on the human operator which is not merited… By calling it ‘lack-of-attention, you seem to be saying “if only pilots could just pay more attention, aviation would be safer…”  Rather, in the examples you provide in section 6.1, the pilots’ attention is appropriately redirected to attend to an emergency situation or unexpected flight situation .
-
-
-%% \begin{changed}
-%% It is hard to argue that a pilot's attention (or lack thereof) has no impact on safety.  There are certainly many other attributes that affect safety, but these attributes were beyond our scope.  We have tried to be more clear about our scope. We would also like to argue that, in the examples we provide, we believe the pilots attention may be {\em inappropriately} redirected.  One possible interpretation of the Asiana 214 crash is that the pilots were so worried about unusual and yet second-order-importance tasks (e.g. training) that they failed to monitor the most important flight state variables (airspeed and altitude). 
-%% \end{changed}
-
-%% Section 4.1  You compare ‘model-based approaches’ to traditional case-studies.  It is not clear what you  mean by traditional case studies.   Do you mean pilot-in-the-loop studies?  What is it about traditional case-studies that is expensive, time-consuming and difficult to reproduce?
-
-
-%% \begin{changed}
-%% We have changed the wording in the section to make it more clear.
-%% \end{changed}
 
 \end{document}
 XXX pragmatics
