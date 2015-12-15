@@ -160,7 +160,7 @@ The algorithms behind GALE have been presented previously~\cite{krall14aaai,kral
  Those prior reports  focused on runtimes and did not explore the analysis implications of GALE.
 The core contribution of this paper is a case study on how GALE-style reasoning assists 
 in the analysis of
-work to support the design of complex operational concepts involving human operators and automated systems. This paper considers the a simulation framework designed to investigate function allocation schemes early in the operational concept design process (CDA~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2013}) 
+work to support the design of complex operational concepts involving human operators and automated systems. This paper considers a simulation framework designed to investigate function allocation schemes early in the operational concept design process (CDA~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2013}) 
 and explores in detail how GALE’s conclusions relate to the effect of function allocation strategy, pilot cognitive control strategy, and operational context impact and safe aircraft operation within the context of that model. 
 As shown in \tion{lfm}, (1)~GALE offers  novel insights into complex cognitive models; (2)~other methods would be so slow to run that it might be impractical to find those insights without GALE.
 
@@ -168,7 +168,7 @@ As shown in \tion{lfm}, (1)~GALE offers  novel insights into complex cognitive m
 The rest of this  paper is structured as follows.
 An effective search of the models requires the utilization of automated tools such as the multi-objective objective evolutionary algorithms (MOEAs) discussed in \tion{lfm}.
 These models are intricate and take time to run. 
-One such MOEA is our GALE tool discussed in \tion{cpu} which, in \tion{case} is applied to a large simulation
+One such MOEA is our GALE tool discussed in \tion{cpu} which, in \tion{case} is applied to a simulation
 of pilots flying an automated aircraft under different function allocations.
 We show that GALE can provide insight into research questions like:
 \begin{itemize}
@@ -185,15 +185,15 @@ We show that GALE can provide insight into research questions like:
 \section{Motivation}\label{sec:mot}
 
 
-Mitigation for human-automation interaction errors consists primarily of defining concepts of operation in which the roles and responsibilities of the pilots and of the automation are clearly laid out.
-As a result, there is active research on using models of human-machine interaction in conjunction with technologies such as model-checking 
-and simulation~\cite{Bolton2011,Rungta2013,Gelman2014}. 
+Mitigation for human-automation interaction errors on the flight deck consists primarily of defining concepts of operation in which the roles and responsibilities of the pilots and of the automation are clearly laid out.
+As a result, there is research on using models of human-machine interaction in conjunction with technologies such as model-checking ~\cite{Bolton2011,Rungta2013,Gelman2014} and simulation~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2014,Feigh2014} at the time of automation design. 
 For example, researchers at Georgia Tech~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2014,Feigh2014} have developed the WMC (Work Models that Compute) framework.  
 
 \subsection{Work Models that Compute}
 
 
-Work Models that Compute (WMC) is a simulation framework, implemented in C++, for modeling and simulating concepts of operation that involve different function allocations between human operators and their automation. WMC work models are representations of the work a team of human and automated agents need to perform to accomplish the objectives of a concept of operation. The representations of work, or work models, are defined by resources and actions (and functions). Resources describe
+Work Models that Compute (WMC) is a simulation framework, implemented in C++, for modeling and simulating concepts of operation that involve different function allocations between human operators and their automation. 
+WMC work models are representations of the work a team of human and automated agents need to perform to accomplish the objectives of a concept of operation. The representations of work, or work models, are defined by resources and actions (and functions). Resources describe
 the state of the work environment and actions
 are the processes by which resources, and thus
 the work environment, are accessed and
@@ -201,12 +201,13 @@ modified. Related actions can be aggregated into functions characterizing work s
 
 Agent models in WMC specify the behaviors of an agent in handling taskwork. A basic agent in WMC is able to process actions assigned to it, execute those actions instantaneously, and report the time of action execution. A human performance agent is tailored to be able to address analyzing impacts of human limitations. For example if an action is counted as a unit of capacity for the human agent, the human can get overloaded and may delay actions, or interrupt them for higher priority actions. They may even forget actions altogether.
 
-A human performance agent also may have different degrees of control over a situation. The opportunistic cognitive control mode is defined as ``the case in which the next action is chosen from the current context alone and mainly based on the salient features rather than durable goals or intentions''~\cite{Hollnagel1993}. The agent operating select the next action in response to assessments that are driven by salient features in the environment. The tactical cognitive control mode is defined as the case in which ``the person’s event horizon goes beyond the dominant needs of the present, but the possible actions considered are still very much related to the immediate extrapolations from the context''~\cite[p170]{Hollnagel1993}. Agents are guided by rules or patterns of behavior. The strategic cognitive control mode is defined as the one where ``the person is using a wider event horizon and looking ahead at higher level goals...''~\cite{Hollnagel1993}. The agent plans actions
-to investigate function allocation, work is assigned to agents. A specified invocation of work models and agent models comprise a scenario, and an analyst may test different function allocations and agent parameterizations for the same scenario through scripts.
+A human performance agent also may have different degrees of control over a situation. The opportunistic cognitive control mode is defined as ``the case in which the next action is chosen from the current context alone and mainly based on the salient features rather than durable goals or intentions''~\cite{Hollnagel1993}. The agent operating selects the next action in response to assessments that are driven by salient features in the environment. The tactical cognitive control mode is defined as the case in which ``the person’s event horizon goes beyond the dominant needs of the present, but the possible actions considered are still very much related to the immediate extrapolations from the context''~\cite[p170]{Hollnagel1993}. Agents are guided by rules or patterns of behavior. The strategic cognitive control mode is defined as the one where ``the person is using a wider event horizon and looking ahead at higher level goals...''~\cite{Hollnagel1993}. The agent plans actions.
+
+To investigate function allocation, work is assigned to agents. A specified invocation of work models and agent models comprise a scenario, and an analyst may test different function allocations and agent parameterizations for the same scenario through scripts.
 
 \subsection{Continuous Descent Approach}
 
-One concept of operation that has been investigated is optimized descent, also know as continuous descent approach (CDA).
+One concept of operation that has been investigated is optimized descent, also known as continuous descent approach (CDA).
 WMC's  simulation models the physics of flight and the atomic actions of the pilots and the automation, in the context of prioritization schemes.
 
 %\begin{comment} XXX
@@ -411,7 +412,7 @@ The {\em decomposition methods} that {\em first} divide the space of candidate s
 each region~\cite{deb05,zhang07}.
 \ei \\\hline
 \end{tabular}
-\caption{Some sample MOEAs. Note that this list is not exhaustive since this is a very active area of research.}\label{fig:sample}
+\caption{Some sample MOEAs.}\label{fig:sample}
 \end{figure}
 
 
@@ -489,18 +490,18 @@ from dozens of models, see \cite{galepaper,krallphd}.
 \section{A Case Study:  CDA and GALE}\label{sec:case}
 
 This case study was designed after reflecting on the following.
-Sometimes, when monitoring cockpit instruments, a pilot is unable to complete all of their required tasks.
+Sometimes, when monitoring cockpit instruments, a pilot is unable to complete all required tasks.
 Such lack-of-attention can have adverse consequences on aviation safety.
-It can occur for many reasons, including  fatigue; or
+It can occur for many reasons, including fatigue, or
  unexpected or stressful situations.
 \subsection{Goals}
 
 The goals of this study are:
 \be
 \item
-To understand the safety implications of lack-of-attention;
+To automatically discover the implications of lack-of-attention within WMC's CDA model;
 \item
-To learn what mitigations exist (if any) for reducing safety problems associated with lack-of-attention.
+To learn what mitigations exist (if any) for reducing the problems associated with this lack-of-attention.
 \ee
 \ADD{We use interrupted, forgotten, and delayed tasks within the CDA model as an incomplete proxy for a safety metric.
 Our possible mitigations are restricted to the input of our CDA problem space.}
@@ -510,7 +511,7 @@ Our possible mitigations are restricted to the input of our CDA problem space.}
 \subsubsection{Apparatus}
 
  
-The CDA work model implemented in WMV is a model of pilot interactions: with each other and also with the navigation systems critical to safe flight.  
+The CDA work model implemented in WMC is a model of pilot interactions: with each other and also with the navigation systems critical to safe flight.  
 CDA employs a continuous descent approach to a runway. 
 As aforementioned, a continuous descent is an alternative to the standard approach to a runway.
 A continuous descent approach is arguably much more efficient in terms of a) fuel economy and cost, b) noise, and c) flight duration.
@@ -520,7 +521,7 @@ As mentioned, human performance agents in WMC have a ``maximum human task load" 
 If the task load is too large, then some of the workload will not be completed in time, or worse yet, might go forgotten entirely.  
 We use the metrics that describe these problems as the output objectives for GALE, i.e., the dependent variables which are detailed in the subsection just below.
 
-Also as mentioned, human performance agents in WMC may emply different cognitive
+Also as mentioned, human performance agents in WMC may employ different cognitive
 control strategies to alleviate the problems of large task loads.   
 By studying the different strategies in terms of the output objective scores (the dependent variables), it is possible to understand the safety implications of different strategies and to learn what mitigations might exist (and can be exploited for safety gain).
 
@@ -549,14 +550,14 @@ ways the pilots can configure the autoflight controls.
 \bd
 \item[{\bf Highly Automated:}] The computer processes most of the flight instructions directly; the pilot only confirms the clearances. This function allocation addresses a possible future concept of operation.
 \item[{\bf Mostly Automated:}] The pilot processes the instructions and programs the autoflight system, but then the autoflight
-system controls the flight path automatically. This mimics current lateral “LNAV” and vertical “VNAV” flight navigation operations.
-\item[{\bf Mixed-Automated:}] The pilot processes the instructions and programs the computer to handle the lateral flight path. The flight crew directly flies uses a lower level of automation for the vertical profile, including the altitude, vertical speed, and airspeed.
+system controls the flight path automatically. This mimics current lateral ``LNAV" and vertical ``VNAV" flight navigation operations.
+\item[{\bf Mixed-Automated:}] The pilot processes the instructions and programs the computer to handle the lateral flight path. The flight crew uses a lower level of automation for the vertical profile, including the altitude, vertical speed, and airspeed.
 \ed
 
-{\em c) Contextual control mode  (CCM)}. These describe the pilots' ability to apply patterns of activity in response to the demands and resources in the environment. These are based on Hollnagel’s work on representative patterns of activity~\cite{Hollnagel1993}:
+{\em c) Contextual control mode  (CCM)}. These describe the pilots' ability to apply patterns of activity in response to the demands and resources in the environment. These are based on Hollnagel's work on representative patterns of activity~\cite{Hollnagel1993}:
 \bd
-\item[{\bf Opportunistic:}] Pilots monitor and perform tasks related to only the most critical functions (monitoring is conducted only when necessary to complete assigned task work).
-\item[{\bf Tactical:}] Pilots cycle through most of the available monitoring tasks, and double check some of the computer’s tasks (periodic monitoring checks are conducted).
+\item[{\bf Opportunistic:}] Pilots monitor and perform tasks related to only the most critical functions (monitoring is conducted only when necessary to complete assigned taskwork).
+\item[{\bf Tactical:}] Pilots cycle through most of the available monitoring tasks, and double check some of the computer's tasks (periodic monitoring checks are conducted).
 \item[{\bf Strategic:}] Pilots cycle through all of the available monitoring tasks, and try to anticipate future tasks.
 \ed
 
@@ -949,10 +950,10 @@ a) Decisions found by GALE; b) Objectives obtained. }\label{fig:all}
 
 \section{Results}
 \subsection{ Results with Opportunistic CCM}
-\fig{all} summarize
+\fig{all} summarizes
 the results.
 As an aid to help visualization, bar graphs are added to each column (and the bar with the largest, smallest value shows the max,min values in the column).
-GALE's decisions are shown at top.
+GALE's decisions are shown at the top.
 Beneath that, we show two sets of objective scores:
 \bi
 \item {\em The baseline runs} which are the average objective scores seen without using GALE (just from randomly selecting input decisions).
@@ -996,7 +997,7 @@ Those mitigations are shown in \fig{all}a.
 
 \subsubsection{Absence}
 
-Several columns in \fig{all}a and \fig{some}a contain nearly all zero values. That is they are mostly {\em absent} from the recommendations made by GALE.
+Several columns in \fig{all}a contain nearly all zero values. That is they are mostly {\em absent} from the recommendations made by GALE.
 
 \bi
 \item
@@ -1121,7 +1122,7 @@ all the conclusions made here came from two tools: the CDA model and GALE.
 If these tools are somehow distorted or biased then our conclusions would be distorted or biased in the same manner.
 That said,
 there is enough  prior work on CDA and GALE  to make the case that it useful to study the CDA model with the GALE optimizer.
-We note that these tools are the products of years of research and much analysis and testing ~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2013,Pritchett2014, Feigh 2014,krall14aaai,krallphd,galepaper}. 
+We note that these tools are the products of years of research and much analysis and testing ~\cite{Kim2011,Pritchett2011,Feigh2012,Kim2013,Pritchett2013,Pritchett2014, Feigh2014, krall14aaai,krallphd,galepaper}. 
 Given the resources spent on its construction, it seems prudent and timely to learn what we can from that model.
 
 %% Also, as to GALE, this algorithm uses a guided $log(N)$ heuristic to explore a space of $O(2N)$ possible comparisons (for details on this approach, see \tion{gale}). 
