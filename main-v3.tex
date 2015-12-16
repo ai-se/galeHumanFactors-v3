@@ -490,8 +490,7 @@ from dozens of models, see \cite{galepaper,krallphd}.
 \section{A Case Study:  CDA and GALE}\label{sec:case}
 
 This case study was designed after reflecting on the following.
-Sometimes, when monitoring cockpit instruments, a pilot is unable to complete all required tasks.
-Such lack-of-attention can have adverse consequences on aviation safety.
+Sometimes, when monitoring cockpit instruments, a pilot is unable to complete all required tasks, which  can have adverse consequences on aviation safety.
 It can occur for many reasons, including fatigue, or
  unexpected or stressful situations.
 \subsection{Goals}
@@ -511,7 +510,7 @@ Our possible mitigations are restricted to the input of our CDA problem space.}
 \subsubsection{Apparatus}
 
  
-The CDA work model implemented in WMC is a model of pilot interactions: with each other and also with the navigation systems critical to safe flight.  
+The CDA work model implemented in WMC is a model of pilot interactions.
 CDA employs a continuous descent approach to a runway. 
 As aforementioned, a continuous descent is an alternative to the standard approach to a runway.
 A continuous descent approach is arguably much more efficient in terms of a) fuel economy and cost, b) noise, and c) flight duration.
@@ -609,7 +608,7 @@ Better pilot organizational structures can be found by exploring different input
 
 \subsubsection{Experimental Design}
 
-In all the following, CDA was run for varying and decreasing values of HTM.
+In  the following, CDA was run for varying and decreasing values of HTM.
 For each HTM value, we collect:
 \bi
 \item {\em The  baseline objective scores} seen in CDA. 
@@ -641,10 +640,9 @@ experiment   was conducted,  with the {\em Opportunistic} mode  disabled.
 We define two  sanity checks on our results:
 
 {\em Sanity check \#1:}
-The clear pre-experimental intuition is that, as we 
+ As we 
 {\em decrease}
 HTM (maximum human task load), we should see {\em increasing} adverse flight operations. 
-If this observation was not seen in the results, the entire investigation should be doubted.
 
 {\em Sanity check \#2:} Using CDA and GALE, we can find mitigations that reduce the effects of decreasing HTM. 
 If this were otherwise, that would suggest that MOEAs like GALE are not useful here.
@@ -1029,7 +1027,7 @@ Accordingly, Experiment \#2 (discussed below) explores the the relative merits o
 
 \subsection{Results with Dsiabling  Opportunistic CCM}
 As shown in \fig{all}a, at low HTM levels of $\mathit{HTM}<4$, most of GALE's recommended actions use the opportunistic cognitive control mode (where pilots monitor and perform tasks related to only the most critical functions). 
-To see if this was some quirk of the simulation, or an important effect, we repeated the above experiment with this opportunistic mode disabled.
+To see if this was  an important effect, we repeated the above experiment with this opportunistic mode disabled.
 
 The results are shown in \fig{some}.  
 In those results, the following aspects are noteworthy:
@@ -1101,9 +1099,6 @@ Forgotten, delayed, and interrupted actions are reported by the simulation at ea
 In principle, all the above conclusions could have been reached using an MOEA like NSGA-II. 
 However, in practice, that would have been impractically slow. 
 To understand why, we must review the systems-level tasks associated with conducting this kind of study.
-Note that a discussion of these systems-level tasks rarely occurs in research publications. 
-Researchers present only their final results and do not mention the work required before those results can be collected. 
-In the case of this study, that work was quite extensive.  
 {\em Commissioning} this CDA model took several months as one of us (Krall) worked inside the NASA firewalls to port the CDA model to the NASA servers. 
 In that process, CDA was run many times to ``iron out the bugs''.  
 Often it was necessary to trace through the evaluations to determine what was
@@ -1226,7 +1221,6 @@ endorsement by the United States Government.
 \bibliographystyle{IEEEtran}
 
 \bibliography{references}
-\newpage
 \begin{IEEEbiography}[{\includegraphics[width=1in,clip,keepaspectratio]{images/joe.png}} ]{Joseph Krall}
 (Ph.D., WVU)
 is J chief data scientist at LoadIQ, Reno, Nevada, a high-tech start-up that researches and investigates cheaper energy solutions.
@@ -1252,8 +1246,7 @@ is a Professor in CS at NcState  His research interests include software enginee
   nascent ideas within systems theory and within the
   mathematics of multi-scale physics modeling.
 \end{IEEEbiography}
-
-\clearpage
+ 
 
 
 \end{document}
